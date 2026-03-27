@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-kinetic-black text-kinetic-white font-sans antialiased;
+  }
+}
+
+/* Custom scrollbar for an aggressive tech look */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #111111;
+}
+::-webkit-scrollbar-thumb {
+  background: #CCFF00;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #aacc00;
+}
