@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, Navigate, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Activity, LayoutDashboard, NotebookPen, Users, LogOut, Menu, X, ShieldAlert } from 'lucide-react';
+import { Activity, LayoutDashboard, NotebookPen, Users, LogOut, Menu, X, ShieldAlert, Timer } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -27,6 +27,7 @@ const MainLayout = () => {
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['atleta', 'treinador', 'admin', 'athlete', 'coach'] },
     { name: 'Workout Builder', path: '/builder', icon: NotebookPen, roles: ['treinador', 'coach'] },
     { name: 'Treino Hoje', path: '/session', icon: Activity, roles: ['atleta', 'athlete'] },
+    { name: 'HIIT (Treinador)', path: '/coach-hiit', icon: Timer, roles: ['treinador', 'coach'] },
     { name: 'Meus Alunos', path: '/users', icon: Users, roles: ['treinador', 'coach'] },
     { name: 'Administração', path: '/admin', icon: ShieldAlert, roles: ['admin'] },
   ].filter(link => link.roles.includes(user.role || 'athlete'));

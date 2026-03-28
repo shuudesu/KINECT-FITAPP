@@ -9,6 +9,8 @@ import WorkoutSession from './pages/WorkoutSession';
 import UserManagement from './pages/UserManagement';
 import AdminDashboard from './pages/AdminDashboard';
 import SeedAdmin from './pages/SeedAdmin';
+import CoachDashboard from './pages/CoachDashboard';
+import WorkoutExecution from './pages/WorkoutExecution';
 import InstallButton from './components/InstallButton';
 
 function App() {
@@ -18,6 +20,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/seed" element={<SeedAdmin />} />
+          <Route path="/workout-hiit" element={<WorkoutExecution />} />
           <Route path="/" element={<MainLayout />}>
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
@@ -25,6 +28,7 @@ function App() {
             <Route path="session" element={<WorkoutSession />} />
             <Route path="users" element={<UserManagement />} />
             <Route path="admin" element={<AdminDashboard />} />
+            <Route path="coach-hiit" element={<CoachDashboard />} />
           </Route>
         </Routes>
         <InstallButton />

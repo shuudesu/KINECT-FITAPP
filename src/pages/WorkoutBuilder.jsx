@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Save, GripVertical, Edit2, X, Dumbbell, CheckCircle } from 'lucide-react';
+import { Plus, Trash2, Save, GripVertical, Edit2, X, Dumbbell, CheckCircle, Users, UserPlus } from 'lucide-react';
 import { EXERCISE_GROUPS } from '../constants/exercises';
 import { supabase } from '../supabase';
 import { useAuth } from '../contexts/AuthContext';
+import AssignToStudentModal from '../components/AssignToStudentModal';
 
 export default function WorkoutBuilder() {
   const { user } = useAuth();
   
   // Form State
   const [editingId, setEditingId] = useState(null);
+  const [assigningToAthlete, setAssigningToAthlete] = useState(null);
   const [title, setTitle] = useState('');
   const [exercises, setExercises] = useState([
     { id: Date.now(), name: '', isCustom: false, customName: '', sets: 3, reps: '10', weight: '' }
@@ -19,10 +21,14 @@ export default function WorkoutBuilder() {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [existingWorkouts, setExistingWorkouts] = useState([]);
+  const [athletes, setAthletes] = useState([]);
 
   useEffect(() => {
-    fetchWorkouts();
-  }, [user.id]);
+    if (user?.id) {
+      fetchWorkouts();
+      fetchAthletes();
+    }
+  }, [user]);
 
   const fetchWorkouts = async () => {
     try {
@@ -32,9 +38,25 @@ export default function WorkoutBuilder() {
         .eq('coach_id', user.id)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      setExistingWorkouts(data || []);
+      
+      const standardWorkouts = (data || []).filter(w => !w.exercises || !w.exercises[0] || !w.exercises[0].is_hiit);
+      setExistingWorkouts(standardWorkouts);
     } catch (err) {
       console.error('Erro ao buscar treinos:', err);
+    }
+  };
+
+  const fetchAthletes = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, name, created_at')
+        .eq('coach_id', user.id);
+      
+      if (error) throw error;
+      setAthletes(data || []);
+    } catch (err) {
+      console.error('Erro ao buscar alunos:', err);
     }
   };
 
@@ -372,6 +394,58 @@ export default function WorkoutBuilder() {
           </div>
         )}
       </div>
+
+      {/* SECTION: MEUS ALUNOS - ATRIBUIÇÃO */}
+      <div className="bg-kinetic-black border border-kinetic-gray rounded-xl p-8 mb-8">
+        <h2 className="text-2xl font-display font-bold text-kinetic-white mb-6 uppercase flex items-center gap-2">
+          <UserPlus className="w-6 h-6 text-kinetic-neon" /> Atribuição de Fichas aos Alunos
+        </h2>
+        
+        {athletes.length === 0 ? (
+          <div className="text-kinetic-white/50 border border-dashed border-kinetic-gray p-8 rounded-xl text-center">
+            Você ainda não possui alunos vinculados para atribuir treinos de musculação.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {athletes.map(athlete => (
+              <div key={athlete.id} className="bg-kinetic-dark p-5 rounded-2xl border border-kinetic-gray flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-kinetic-neon/20 flex items-center justify-center text-kinetic-neon font-bold">
+                    {athlete.name?.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-kinetic-white">{athlete.name}</h4>
+                    <p className="text-xs text-kinetic-white/50">Aluno desde {new Date(athlete.created_at).toLocaleDateString()}</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setAssigningToAthlete(athlete)}
+                  className="p-2 bg-kinetic-neon text-kinetic-black rounded-lg hover:bg-kinetic-white transition-all"
+                  title="Atribuir Treinos Musculação"
+                >
+                  <Plus className="w-5 h-5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* MODAL DE ATRIBUIÇÃO MÚLTIPLA */}
+      {assigningToAthlete && (
+        <AssignToStudentModal
+          athlete={assigningToAthlete}
+          coachId={user.id}
+          workoutType="standard"
+          onClose={(saved) => {
+            if (saved) {
+              setSuccess(`Fichas atribuídas para ${assigningToAthlete.name}!`);
+              setTimeout(() => setSuccess(''), 3000);
+            }
+            setAssigningToAthlete(null);
+          }}
+        />
+      )}
 
     </div>
   );
