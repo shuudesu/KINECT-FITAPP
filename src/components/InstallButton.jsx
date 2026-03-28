@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Download } from 'lucide-react';
 
-export default function InstallButton() {
+export default function InstallButton({ inline = false }) {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isInstallable, setIsInstallable] = useState(false);
 
@@ -50,10 +50,10 @@ export default function InstallButton() {
   return (
     <button
       onClick={handleInstallClick}
-      className="fixed bottom-6 right-6 z-[9999] bg-kinetic-neon text-kinetic-black w-16 h-16 rounded-full flex flex-col items-center justify-center shadow-[0_0_20px_rgba(204,255,0,0.5)] hover:scale-105 hover:bg-kinetic-white transition-all cursor-pointer animate-bounce"
+      className="fixed bottom-0 right-0 z-[9999] bg-kinetic-neon text-kinetic-black w-14 h-14 md:w-16 md:h-16 rounded-tl-2xl flex flex-col items-center justify-center shadow-[-5px_-5px_15px_rgba(0,0,0,0.3)] hover:bg-kinetic-white transition-colors cursor-pointer"
       title="Baixar App KINETIC"
     >
-      <Download className="w-7 h-7" />
+      <Download className="w-6 h-6 md:w-7 md:h-7" />
     </button>
   );
 }

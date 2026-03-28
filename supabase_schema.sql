@@ -64,9 +64,11 @@ ON profiles FOR DELETE
 TO authenticated 
 USING (auth.uid() = coach_id);
 
--- Políticas básicas para workouts e sessions (Treinadores podem criar, atletas ver)
+-- Políticas básicas para workouts e sessions (Treinadores podem criar, editar, deletar e atletas ver)
 CREATE POLICY "Leitura de treinos" ON workouts FOR SELECT TO authenticated USING (true);
 CREATE POLICY "Criar treinos" ON workouts FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "Atualizar treinos" ON workouts FOR UPDATE TO authenticated USING (auth.uid() = coach_id);
+CREATE POLICY "Deletar treinos" ON workouts FOR DELETE TO authenticated USING (auth.uid() = coach_id);
 CREATE POLICY "Leitura de sessões" ON workout_sessions FOR SELECT TO authenticated USING (true);
 CREATE POLICY "Criar sessões" ON workout_sessions FOR INSERT TO authenticated WITH CHECK (auth.uid() = athlete_id);
 
