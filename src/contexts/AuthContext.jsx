@@ -71,7 +71,7 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (username, password, name, role = 'athlete', coachId = null) => {
     try {
-      const dummyEmail = `${username.toLowerCase()}@kinetic.app`;
+      const dummyEmail = `${username.toLowerCase().trim()}@kinetic.app`;
       
       // Criamos um cliente isolado para o cadastro para impedir que o Admin perca sua sessão quando criar um treinador
       const url = import.meta.env.VITE_SUPABASE_URL;
@@ -93,7 +93,7 @@ export const AuthProvider = ({ children }) => {
           .insert([
             {
               id: newUser.id,
-              username: username.toLowerCase(),
+              username: username.toLowerCase().trim(),
               email: dummyEmail,
               name: name,
               role: role,
@@ -112,12 +112,15 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     try {
-      const dummyEmail = `${username.toLowerCase()}@kinetic.app`;
-      const { error } = await supabase.auth.signInWithPassword({
+      const dummyEmail = `${username.toLowerCase().trim()}@kinetic.app`;
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: dummyEmail,
         password,
       });
       if (error) throw error;
+      if (data.user) {
+        await fetchProfile(data.user);
+      }
       return { success: true };
     } catch (error) {
       return { success: false, error: 'Usuário ou senha inválidos.' };

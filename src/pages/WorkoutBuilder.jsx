@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Save, GripVertical, Edit2, X, Dumbbell } from 'lucide-react';
+import { Plus, Trash2, Save, GripVertical, Edit2, X, Dumbbell, CheckCircle } from 'lucide-react';
 import { EXERCISE_GROUPS } from '../constants/exercises';
 import { supabase } from '../supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -141,8 +141,13 @@ export default function WorkoutBuilder() {
   const handleDeleteWorkout = async (id) => {
     if (!window.confirm("ATENÇÃO: Deseja realmente excluir este treino permanentemente? Isso irá removê-lo do aplicativo e das fichas dos alunos atribuídos.")) return;
     try {
+      // Remover referências primeiro para não dar erro de restrição de chave estrangeira
+      const { error: assignError } = await supabase.from('workout_assignments').delete().eq('workout_id', id);
+      if (assignError) console.warn("Aviso ao remover atribuições:", assignError);
+
       const { error } = await supabase.from('workouts').delete().eq('id', id).eq('coach_id', user.id);
       if (error) throw error;
+      
       fetchWorkouts();
       if (editingId === id) resetForm();
     } catch (err) {
