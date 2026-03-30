@@ -21,16 +21,85 @@ export default function WorkoutBuilder() {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [existingWorkouts, setExistingWorkouts] = useState([]);
+  const [coachCustomExercises, setCoachCustomExercises] = useState([]);
+  const [savingToList, setSavingToList] = useState(null); // id do exercício sendo salvo
   const [athletes, setAthletes] = useState([]);
 
   useEffect(() => {
     if (user?.id) {
       fetchWorkouts();
       fetchAthletes();
+      fetchCoachCustomExercises();
     }
   }, [user]);
 
+  const fetchCoachCustomExercises = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('coach_custom_exercises')
+        .select('name')
+        .eq('coach_id', user.id)
+        .order('name', { ascending: true });
+      if (error) throw error;
+      setCoachCustomExercises((data || []).map(r => r.name));
+    } catch (err) {
+      // Tabela ainda não existe — lista fica vazia até ser criada
+      console.warn('coach_custom_exercises:', err.message);
+      setCoachCustomExercises([]);
+    }
+  };
+
+
+  const saveExerciseToMyList = async (exerciseId, exerciseName) => {
+    const trimmed = exerciseName?.trim();
+    if (!trimmed) return;
+    if (coachCustomExercises.includes(trimmed)) {
+      setSuccess(`"${trimmed}" já está na sua lista!`);
+      setTimeout(() => setSuccess(''), 2000);
+      return;
+    }
+    setSavingToList(exerciseId);
+    try {
+      const { error } = await supabase
+        .from('coach_custom_exercises')
+        .insert([{ coach_id: user.id, name: trimmed }]);
+      if (error) throw error;
+      setCoachCustomExercises(prev => [...prev, trimmed].sort());
+      setSuccess(`✨ "${trimmed}" salvo na sua lista!`);
+      setTimeout(() => setSuccess(''), 2500);
+    } catch (err) {
+      console.error('Erro ao salvar exercício:', err);
+      setError('Não foi possível salvar. Execute o SQL no Supabase para criar a tabela coach_custom_exercises.');
+      setTimeout(() => setError(''), 5000);
+    } finally {
+      setSavingToList(null);
+    }
+  };
+
+  const deleteExerciseFromMyList = async (exerciseName) => {
+    if (!window.confirm(`Remover "${exerciseName}" da sua lista pessoal?`)) return;
+    try {
+      const { error } = await supabase
+        .from('coach_custom_exercises')
+        .delete()
+        .eq('coach_id', user.id)
+        .eq('name', exerciseName);
+      if (error) throw error;
+      setCoachCustomExercises(prev => prev.filter(n => n !== exerciseName));
+      // Se algum exercício no form usava esse nome, limpar
+      setExercises(prev => prev.map(ex =>
+        ex.name === exerciseName ? { ...ex, name: '' } : ex
+      ));
+      setSuccess(`"${exerciseName}" removido da sua lista.`);
+      setTimeout(() => setSuccess(''), 2500);
+    } catch (err) {
+      console.error('Erro ao excluir exercício:', err);
+      setError('Não foi possível excluir.');
+      setTimeout(() => setError(''), 3000);
+    }
+  };
   const fetchWorkouts = async () => {
+
     try {
       const { data, error } = await supabase
         .from('workouts')
@@ -41,10 +110,12 @@ export default function WorkoutBuilder() {
       
       const standardWorkouts = (data || []).filter(w => !w.exercises || !w.exercises[0] || !w.exercises[0].is_hiit);
       setExistingWorkouts(standardWorkouts);
+
     } catch (err) {
       console.error('Erro ao buscar treinos:', err);
     }
   };
+
 
   const fetchAthletes = async () => {
     try {
@@ -160,6 +231,8 @@ export default function WorkoutBuilder() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+
+
   const handleDeleteWorkout = async (id) => {
     if (!window.confirm("ATENÇÃO: Deseja realmente excluir este treino permanentemente? Isso irá removê-lo do aplicativo e das fichas dos alunos atribuídos.")) return;
     try {
@@ -250,6 +323,7 @@ export default function WorkoutBuilder() {
                 <div className="col-span-1 md:col-span-5 flex flex-col">
                   <span className="text-kinetic-white/50 text-xs mb-1 uppercase font-bold">Exercício</span>
                   {!exercise.isCustom ? (
+                    <div className="flex gap-2 items-center">
                     <select
                       value={exercise.name}
                       onChange={(e) => {
@@ -267,6 +341,15 @@ export default function WorkoutBuilder() {
                     >
                       <option value="">Selecione da Lista</option>
                       <option value="CUSTOM_EXERCISE" className="text-kinetic-neon font-bold">++ CRIAR EXERCÍCIO MANUAL ++</option>
+                      
+                      {coachCustomExercises.length > 0 && (
+                        <optgroup label={`⚡ Exercícios de ${user?.user_metadata?.name?.split(' ')[0] || 'Treinador'}`} className="bg-kinetic-neon/20 text-kinetic-neon font-black">
+                          {coachCustomExercises.map(exName => (
+                            <option key={exName} value={exName} className="font-normal text-kinetic-white">{exName}</option>
+                          ))}
+                        </optgroup>
+                      )}
+
                       {Object.entries(EXERCISE_GROUPS).map(([groupName, groupExercises]) => (
                         <optgroup key={groupName} label={groupName} className="bg-kinetic-gray text-kinetic-white font-bold">
                           {groupExercises.map(exName => (
@@ -275,6 +358,17 @@ export default function WorkoutBuilder() {
                         </optgroup>
                       ))}
                     </select>
+                    {/* Botão excluir da lista pessoal — aparece apenas para exercícios do treinador */}
+                    {coachCustomExercises.includes(exercise.name) && (
+                      <button
+                        onClick={() => deleteExerciseFromMyList(exercise.name)}
+                        title="Remover da minha lista"
+                        className="mt-0.5 flex items-center justify-center px-2 py-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all border border-red-500/30 hover:border-red-500 text-xs font-bold whitespace-nowrap"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
                   ) : (
                     <div className="flex gap-2">
                        <input 
@@ -289,6 +383,20 @@ export default function WorkoutBuilder() {
                          className="w-full bg-kinetic-black border border-kinetic-neon text-kinetic-neon font-medium py-3 px-3 rounded-lg focus:outline-none"
                          autoFocus
                        />
+                       {/* Botão: Salvar na lista pessoal */}
+                       <button
+                         onClick={() => saveExerciseToMyList(exercise.id, exercise.customName)}
+                         disabled={!exercise.customName?.trim() || savingToList === exercise.id}
+                         title="Salvar este exercício na sua lista pessoal"
+                         className="flex items-center justify-center bg-kinetic-neon text-kinetic-black px-3 rounded-lg font-black text-lg hover:bg-white transition-all disabled:opacity-30 disabled:cursor-not-allowed min-w-[40px]"
+                       >
+                         {savingToList === exercise.id ? (
+                           <span className="text-xs font-bold animate-pulse">...</span>
+                         ) : (
+                           <Plus className="w-4 h-4" />
+                         )}
+                       </button>
+                       {/* Botão: Voltar para a lista */}
                        <button 
                          onClick={() => {
                            const newExs = [...exercises];
@@ -317,7 +425,7 @@ export default function WorkoutBuilder() {
                 </div>
 
                 {/* Reps */}
-                <div className="col-span-1 md:col-span-3 flex flex-col">
+                <div className="col-span-1 md:col-span-2 flex flex-col">
                   <span className="text-kinetic-white/50 text-xs mb-1 uppercase font-bold text-center">Repetições</span>
                   <input type="text" value={exercise.reps} onChange={(e) => {
                       const newExs = [...exercises];
@@ -326,15 +434,17 @@ export default function WorkoutBuilder() {
                   }} placeholder="Ex: 8-12" className="w-full bg-transparent border-b border-kinetic-gray focus:border-kinetic-neon text-kinetic-white py-3 focus:outline-none text-center font-mono text-lg" />
                 </div>
 
-                {/* Carga */}
-                <div className="col-span-1 md:col-span-2 flex flex-col">
-                  <span className="text-kinetic-white/50 text-xs mb-1 uppercase font-bold text-center text-kinetic-neon">Carga (kg)</span>
+                {/* Comentários */}
+                <div className="col-span-1 md:col-span-3 flex flex-col">
+                  <span className="text-kinetic-white/50 text-xs mb-1 uppercase font-bold text-center text-kinetic-neon">Comentários</span>
                   <input type="text" value={exercise.weight} onChange={(e) => {
                       const newExs = [...exercises];
                       newExs[index].weight = e.target.value;
                       setExercises(newExs);
-                  }} placeholder="Opcional" className="w-full bg-transparent border-b border-kinetic-neon/30 focus:border-kinetic-neon text-kinetic-neon py-3 focus:outline-none text-center font-mono text-lg" />
+                  }} placeholder="Obs para o aluno..." className="w-full bg-transparent border-b border-kinetic-neon/30 focus:border-kinetic-neon text-kinetic-neon py-3 focus:outline-none text-center font-sans text-sm" />
                 </div>
+
+
 
               </div>
               <button 

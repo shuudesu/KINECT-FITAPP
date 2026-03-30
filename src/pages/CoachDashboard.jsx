@@ -9,6 +9,7 @@ import { supabase } from '../supabase';
 import { useAuth } from '../contexts/AuthContext';
 import AssignToStudentModal from '../components/AssignToStudentModal';
 
+
 const mockChartData = [
   { time: '06:00', burpees: 0, kcal: 0 },
   { time: '08:00', burpees: 0, kcal: 0 },
@@ -20,8 +21,10 @@ const mockChartData = [
 ];
 
 const PREDEFINED_HIIT_EXERCISES = [
-  'Burpees', 'Mountain Climbers', 'Jumping Jacks', 
-  'High Knees', 'Squat Jumps', 'Plank Jacks', 'Sprints'
+  'Burpees', 'Polichinelos', 'Alpinista (Mountain Climbers)', 
+  'Corrida Estacionária', 'Agachamento com Salto', 'Avanço com Salto', 
+  'Sprints (Tiros)', 'Prancha com Salto Térmico', 'Kettlebell Swing', 
+  'Abdominal Remador', 'Sprawl', 'Corda Naval', 'Pular Corda', 'Thrusters'
 ];
 
 const INTENSITIES = [
@@ -101,13 +104,13 @@ export default function CoachDashboard() {
 
 
   const addExercise = (name) => {
-    setExercises([...exercises, { id: Date.now(), name, duration: 45, rest: 15, intensity: selectedIntensity }]);
+    setExercises([...exercises, { id: Date.now(), name, duration: 45, rest: 15, intensity: selectedIntensity, imageUrl: '' }]);
   };
 
   const addCustomExercise = (e) => {
     e.preventDefault();
     if (!customExercise.name.trim()) return;
-    setExercises([...exercises, { id: Date.now(), ...customExercise, intensity: selectedIntensity }]);
+    setExercises([...exercises, { id: Date.now(), ...customExercise, intensity: selectedIntensity, imageUrl: '' }]);
     setCustomExercise({ name: '', duration: 40, rest: 20 });
   };
 
@@ -161,6 +164,8 @@ export default function CoachDashboard() {
     setTitle('');
     setExercises([]);
   };
+
+
 
   const handleEdit = (w) => {
     setEditingId(w.id);
@@ -410,15 +415,42 @@ export default function CoachDashboard() {
                     exercises.map((ex, idx) => {
                       const exIntensity = INTENSITIES.find(i => i.id === ex.intensity) || INTENSITIES[2];
                       return (
-                        <div key={ex.id} className="flex flex-wrap sm:flex-nowrap items-center justify-between bg-[#150a25] p-3 rounded-xl border border-[#341d5e]">
-                          <div className="flex items-center mb-2 sm:mb-0">
-                            <span className="w-8 h-8 rounded-full bg-[#241541] text-[#a98fff] flex items-center justify-center font-bold mr-3 text-sm">
+                        <div key={ex.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-[#150a25] p-3 rounded-xl border border-[#341d5e] gap-4">
+                          <div className="flex items-center w-full sm:w-auto">
+                            <span className="w-8 h-8 rounded-full bg-[#241541] text-[#a98fff] flex items-center justify-center font-bold mr-3 text-sm shrink-0">
                               {idx + 1}
                             </span>
-                            <span className="text-lg mr-2" title={exIntensity.label}>{exIntensity.emoji}</span>
-                            <span className="font-semibold text-[#fcf4ff]">{ex.name}</span>
+                            <div className="flex flex-col">
+                              <div className="flex items-center">
+                                <span className="text-lg mr-2" title={exIntensity.label}>{exIntensity.emoji}</span>
+                                <span className="font-semibold text-[#fcf4ff]">{ex.name}</span>
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-4 text-sm text-[#baa4d3]">
+                          
+                          {/* IA Generator Button / Image Preview (HIIT) */}
+                          <div className="flex-1 w-full sm:w-auto flex justify-center sm:justify-end">
+                            {ex.imageUrl ? (
+                               <div className="relative group w-24 h-16 rounded overflow-hidden border border-[#341d5e] hover:border-[#6437db]">
+                                 <img src={ex.imageUrl} alt={ex.name} className="w-full h-full object-cover" />
+                                 <button disabled={generatingImageId === ex.id} onClick={() => handleGenerateImage(idx)} className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all text-white font-bold text-xs gap-1">
+                                   {generatingImageId === ex.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                                 </button>
+                               </div>
+                            ) : (
+                               <button 
+                                 onClick={() => handleGenerateImage(idx)}
+                                 disabled={generatingImageId === ex.id}
+                                 className="text-xs bg-[#241541] text-[#e1c7ff] border border-[#a98fff]/30 px-3 py-1.5 rounded-lg flex items-center gap-1 hover:bg-[#6437db] hover:text-white transition-all disabled:opacity-50"
+                                 title="Gerar e salvar ilustração anatômica"
+                               >
+                                 {generatingImageId === ex.id ? <Loader2 className="w-4 h-4 animate-spin"/> : <Sparkles className="w-4 h-4 text-[#a98fff]"/>}
+                                 {generatingImageId === ex.id ? 'Gerando...' : 'IA 3D'}
+                               </button>
+                            )}
+                          </div>
+
+                          <div className="flex justify-between w-full sm:w-auto items-center gap-4 text-sm text-[#baa4d3] border-t sm:border-t-0 border-[#341d5e] pt-2 sm:pt-0 mt-2 sm:mt-0">
                             <span className="bg-[#1a0f2e] px-2 py-1 rounded-md">
                               <Flame className="w-3 h-3 inline text-[#f74b6d] mr-1" />
                               {ex.duration}s
