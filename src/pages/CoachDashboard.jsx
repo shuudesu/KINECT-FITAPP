@@ -20,12 +20,59 @@ const mockChartData = [
   { time: '18:00', burpees: 0, kcal: 0 },
 ];
 
-const PREDEFINED_HIIT_EXERCISES = [
-  'Burpees', 'Polichinelos', 'Alpinista (Mountain Climbers)', 
-  'Corrida Estacionária', 'Agachamento com Salto', 'Avanço com Salto', 
-  'Sprints (Tiros)', 'Prancha com Salto Térmico', 'Kettlebell Swing', 
-  'Abdominal Remador', 'Sprawl', 'Corda Naval', 'Pular Corda', 'Thrusters'
+const HIIT_EXERCISE_GROUPS = [
+  {
+    id: 'cardio', label: '🚴 Cardio', exercises: [
+      'Esteira (Corrida)', 'Esteira (Caminhada Inclinada)', 'Bicicleta Ergométrica',
+      'Bicicleta Spinning', 'Elíptico', 'Remo Ergométrico (Rowing Machine)',
+      'Escada Rolante (Stair Climber)', 'Esqui Nórdico (Ski Erg)',
+      'Corrida Estacionária', 'Sprints (Tiros)', 'Corrida com Joelhos Altos',
+      'Corrida com Calcanhares no Glúteo',
+    ],
+  },
+  {
+    id: 'saltos', label: '⚡ Saltos', exercises: [
+      'Polichinelos', 'Polichinelo Lateral', 'Agachamento com Salto',
+      'Avanço com Salto', 'Box Jump', 'Salto ao Caixote', 'Step Alternado',
+    ],
+  },
+  {
+    id: 'burpees', label: '💥 Burpees', exercises: [
+      'Burpees', 'Burpee com Salto', 'Burpee com Flexão', 'Sprawl',
+    ],
+  },
+  {
+    id: 'flexao', label: '💪 Flexão', exercises: [
+      'Flexão de Braços', 'Flexão Inclinada', 'Flexão Declinada',
+      'Flexão com Rotação', 'Flexão Explosiva (Palmas)',
+    ],
+  },
+  {
+    id: 'core', label: '🧘 Core', exercises: [
+      'Prancha (Hold)', 'Prancha com Salto Térmico', 'Alpinista (Mountain Climbers)',
+      'Alpinista Cruzado', 'Abdominal Remador', 'Abdominal Bicicleta',
+      'Elevação de Pernas Deitado', 'Russian Twist', 'V-Up',
+    ],
+  },
+  {
+    id: 'pernas', label: '🦵 Pernas', exercises: [
+      'Agachamento Livre', 'Agachamento Sumô', 'Agachamento Isométrico (Wall Sit)',
+      'Afundo Alternado', 'Ponte de Glúteo', 'Stiff com Peso Corporal',
+    ],
+  },
+  {
+    id: 'funcional', label: '🏋️ Funcional', exercises: [
+      'Kettlebell Swing', 'Kettlebell Snatch', 'Thrusters', 'Clean & Press',
+      'Corda Naval (Battle Rope)', 'Pular Corda', 'Lançamento de Slam Ball',
+      'Sled Push (Trenó)', 'Farmer Carry (Caminhada com Peso)',
+    ],
+  },
 ];
+
+// Lista flat para compatibilidade com código existente
+const PREDEFINED_HIIT_EXERCISES = HIIT_EXERCISE_GROUPS.flatMap(g => g.exercises);
+
+
 
 const INTENSITIES = [
   { id: 'leve', emoji: '🟢', label: 'Leve (Z2)' },
@@ -40,6 +87,7 @@ export default function CoachDashboard() {
   const [exercises, setExercises] = useState([]);
   const [customExercise, setCustomExercise] = useState({ name: '', duration: 40, rest: 20 });
   const [selectedIntensity, setSelectedIntensity] = useState('intenso');
+  const [activeCategoryTab, setActiveCategoryTab] = useState('cardio');
 
   // Novos Estados (Builder & Assign)
   const [title, setTitle] = useState('');
@@ -343,64 +391,82 @@ export default function CoachDashboard() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
-                {/* PRE-DEFINED LIST */}
-                <div>
-                  <h3 className="text-[#baa4d3] text-sm font-semibold uppercase tracking-wider mb-3">Exercícios Mais Usados</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {PREDEFINED_HIIT_EXERCISES.map(ex => (
-                      <button 
+              {/* EXERCISE PICKER: ABAS POR CATEGORIA */}
+              <div className="mb-6">
+                {/* Tabs scrolláveis (mobile-friendly) */}
+                <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none mb-3">
+                  {HIIT_EXERCISE_GROUPS.map(group => (
+                    <button
+                      key={group.id}
+                      onClick={() => setActiveCategoryTab(group.id)}
+                      className={`flex-none text-sm font-bold px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+                        activeCategoryTab === group.id
+                          ? 'bg-[#6437db] text-white shadow-[0_0_10px_rgba(100,55,219,0.5)]'
+                          : 'bg-[#150a25] text-[#baa4d3] border border-[#341d5e] hover:bg-[#241541]'
+                      }`}
+                    >
+                      {group.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Grid de chips da categoria ativa */}
+                {HIIT_EXERCISE_GROUPS.filter(g => g.id === activeCategoryTab).map(group => (
+                  <div key={group.id} className="grid grid-cols-2 gap-2">
+                    {group.exercises.map(ex => (
+                      <button
                         key={ex}
                         onClick={() => addExercise(ex)}
-                        className="bg-[#241541] hover:bg-[#341d5e] text-[#e1c7ff] text-sm px-3 py-1.5 rounded-full transition-colors border border-[#6437db]/30 flex items-center"
+                        className="flex items-center gap-1.5 bg-[#150a25] hover:bg-[#341d5e] active:scale-95 text-[#e1c7ff] text-xs px-3 py-2.5 rounded-xl transition-all border border-[#6437db]/20 hover:border-[#6437db]/60 text-left w-full"
                       >
-                        <Plus className="w-3 h-3 mr-1" /> {ex}
+                        <Plus className="w-3 h-3 shrink-0 text-[#a98fff]" />
+                        <span className="leading-tight">{ex}</span>
                       </button>
                     ))}
                   </div>
-                </div>
-
-                {/* MANUAL ENTRY */}
-                <div>
-                  <h3 className="text-[#baa4d3] text-sm font-semibold uppercase tracking-wider mb-3">Adicionar Personalizado</h3>
-                  <form onSubmit={addCustomExercise} className="space-y-3">
-                    <input 
-                      type="text" 
-                      placeholder="Nome do Exercício"
-                      value={customExercise.name}
-                      onChange={(e) => setCustomExercise({...customExercise, name: e.target.value})}
-                      className="w-full bg-[#150a25] border border-[#341d5e] rounded-xl px-4 py-2 focus:outline-none focus:border-[#6437db] text-[#fcf4ff]"
-                    />
-                    <div className="flex gap-2">
-                      <div className="flex-1">
-                        <label className="text-xs text-[#826f9a] block mb-1">Ação (s)</label>
-                        <input 
-                          type="number" 
-                          value={customExercise.duration}
-                          onChange={(e) => setCustomExercise({...customExercise, duration: Number(e.target.value)})}
-                          className="w-full bg-[#150a25] border border-[#341d5e] rounded-xl px-4 py-2 focus:outline-none focus:border-[#6437db] text-[#fcf4ff]"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <label className="text-xs text-[#826f9a] block mb-1">Pausa (s)</label>
-                        <input 
-                          type="number" 
-                          value={customExercise.rest}
-                          onChange={(e) => setCustomExercise({...customExercise, rest: Number(e.target.value)})}
-                          className="w-full bg-[#150a25] border border-[#341d5e] rounded-xl px-4 py-2 focus:outline-none focus:border-[#6437db] text-[#fcf4ff]"
-                        />
-                      </div>
-                    </div>
-                    <button 
-                      type="submit"
-                      className="w-full bg-[#6437db] hover:bg-[#5826cf] text-white py-2 rounded-xl border border-[#a98fff]/20 transition-all shadow-[0_0_15px_rgba(100,55,219,0.3)]"
-                    >
-                      Adicionar à Série
-                    </button>
-                  </form>
-                </div>
+                ))}
               </div>
+
+              {/* MANUAL ENTRY — linha compacta */}
+              <div className="mb-6 p-4 bg-[#150a25] rounded-2xl border border-[#341d5e]">
+                <h3 className="text-[#baa4d3] text-xs font-bold uppercase tracking-wider mb-3">✏️ Adicionar Personalizado</h3>
+                <form onSubmit={addCustomExercise} className="flex flex-col gap-2">
+                  <input
+                    type="text"
+                    placeholder="Nome do Exercício"
+                    value={customExercise.name}
+                    onChange={(e) => setCustomExercise({...customExercise, name: e.target.value})}
+                    className="w-full bg-[#0d0714] border border-[#341d5e] rounded-xl px-4 py-2.5 focus:outline-none focus:border-[#6437db] text-[#fcf4ff] text-sm"
+                  />
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <label className="text-xs text-[#826f9a] block mb-1">⚡ Ação (s)</label>
+                      <input
+                        type="number"
+                        value={customExercise.duration}
+                        onChange={(e) => setCustomExercise({...customExercise, duration: Number(e.target.value)})}
+                        className="w-full bg-[#0d0714] border border-[#341d5e] rounded-xl px-3 py-2 focus:outline-none focus:border-[#6437db] text-[#fcf4ff] text-sm"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="text-xs text-[#826f9a] block mb-1">💤 Pausa (s)</label>
+                      <input
+                        type="number"
+                        value={customExercise.rest}
+                        onChange={(e) => setCustomExercise({...customExercise, rest: Number(e.target.value)})}
+                        className="w-full bg-[#0d0714] border border-[#341d5e] rounded-xl px-3 py-2 focus:outline-none focus:border-[#6437db] text-[#fcf4ff] text-sm"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="self-end bg-[#6437db] hover:bg-[#5826cf] text-white px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-1 shadow-[0_0_10px_rgba(100,55,219,0.3)]"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
+                </form>
+              </div>
+
 
               {/* CURRENT SELECTION */}
               <div className="mt-8">
@@ -412,57 +478,25 @@ export default function CoachDashboard() {
                   {exercises.length === 0 ? (
                     <p className="text-[#826f9a] text-center py-4 bg-[#150a25] rounded-xl">Nenhum exercício configurado.</p>
                   ) : (
-                    exercises.map((ex, idx) => {
+                 exercises.map((ex, idx) => {
                       const exIntensity = INTENSITIES.find(i => i.id === ex.intensity) || INTENSITIES[2];
                       return (
-                        <div key={ex.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-[#150a25] p-3 rounded-xl border border-[#341d5e] gap-4">
-                          <div className="flex items-center w-full sm:w-auto">
-                            <span className="w-8 h-8 rounded-full bg-[#241541] text-[#a98fff] flex items-center justify-center font-bold mr-3 text-sm shrink-0">
-                              {idx + 1}
-                            </span>
-                            <div className="flex flex-col">
-                              <div className="flex items-center">
-                                <span className="text-lg mr-2" title={exIntensity.label}>{exIntensity.emoji}</span>
-                                <span className="font-semibold text-[#fcf4ff]">{ex.name}</span>
-                              </div>
-                            </div>
+                        <div key={ex.id} className="flex items-center gap-3 bg-[#150a25] px-3 py-2.5 rounded-xl border border-[#341d5e] active:scale-[0.98] transition-transform">
+                          <span className="w-7 h-7 rounded-full bg-[#241541] text-[#a98fff] flex items-center justify-center font-bold text-xs shrink-0">
+                            {idx + 1}
+                          </span>
+                          <span className="text-base shrink-0" title={exIntensity.label}>{exIntensity.emoji}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-[#fcf4ff] text-sm leading-tight truncate">{ex.name}</p>
+                            <p className="text-[10px] text-[#826f9a] mt-0.5">
+                              <span className="text-[#f74b6d]">⚡ {ex.duration}s</span>
+                              <span className="mx-1">·</span>
+                              <span className="text-[#826f9a]">💤 {ex.rest}s</span>
+                            </p>
                           </div>
-                          
-                          {/* IA Generator Button / Image Preview (HIIT) */}
-                          <div className="flex-1 w-full sm:w-auto flex justify-center sm:justify-end">
-                            {ex.imageUrl ? (
-                               <div className="relative group w-24 h-16 rounded overflow-hidden border border-[#341d5e] hover:border-[#6437db]">
-                                 <img src={ex.imageUrl} alt={ex.name} className="w-full h-full object-cover" />
-                                 <button disabled={generatingImageId === ex.id} onClick={() => handleGenerateImage(idx)} className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all text-white font-bold text-xs gap-1">
-                                   {generatingImageId === ex.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                                 </button>
-                               </div>
-                            ) : (
-                               <button 
-                                 onClick={() => handleGenerateImage(idx)}
-                                 disabled={generatingImageId === ex.id}
-                                 className="text-xs bg-[#241541] text-[#e1c7ff] border border-[#a98fff]/30 px-3 py-1.5 rounded-lg flex items-center gap-1 hover:bg-[#6437db] hover:text-white transition-all disabled:opacity-50"
-                                 title="Gerar e salvar ilustração anatômica"
-                               >
-                                 {generatingImageId === ex.id ? <Loader2 className="w-4 h-4 animate-spin"/> : <Sparkles className="w-4 h-4 text-[#a98fff]"/>}
-                                 {generatingImageId === ex.id ? 'Gerando...' : 'IA 3D'}
-                               </button>
-                            )}
-                          </div>
-
-                          <div className="flex justify-between w-full sm:w-auto items-center gap-4 text-sm text-[#baa4d3] border-t sm:border-t-0 border-[#341d5e] pt-2 sm:pt-0 mt-2 sm:mt-0">
-                            <span className="bg-[#1a0f2e] px-2 py-1 rounded-md">
-                              <Flame className="w-3 h-3 inline text-[#f74b6d] mr-1" />
-                              {ex.duration}s
-                            </span>
-                            <span className="bg-[#1a0f2e] px-2 py-1 rounded-md">
-                              <Timer className="w-3 h-3 inline text-[#826f9a] mr-1" />
-                              {ex.rest}s
-                            </span>
-                            <button onClick={() => removeExercise(ex.id)} className="text-[#b41340] hover:text-[#f74b6d] transition-colors p-1">
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
+                          <button onClick={() => removeExercise(ex.id)} className="text-[#341d5e] hover:text-[#f74b6d] transition-colors p-1.5 rounded-lg hover:bg-[#b41340]/10">
+                            <X className="w-4 h-4" />
+                          </button>
                         </div>
                       );
                     })
