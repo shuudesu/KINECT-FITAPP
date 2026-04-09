@@ -685,7 +685,7 @@ export default function Dashboard() {
                         <h2 className="text-base font-display font-bold text-kinetic-white uppercase mb-3 flex items-center gap-2">
                           <TrendingUp className="w-4 h-4 text-kinetic-neon" /> Evolução de Carga — Exercícios
                         </h2>
-                        {teamExerciseProgress.length < 2 ? (
+                        {athleteExerciseChart.progress.length < 2 ? (
                           <div className="h-44 flex flex-col items-center justify-center text-kinetic-white/30 gap-2">
                             <TrendingUp className="w-8 h-8 opacity-20" />
                             <p className="text-xs text-center">Preencha o KG nos treinos para ver a evolução por exercício.</p>
@@ -695,7 +695,7 @@ export default function Dashboard() {
                           return (
                             <>
                               <div className="flex flex-wrap gap-3 mb-3">
-                                {teamTopExercises.map((ex, i) => (
+                                {athleteExerciseChart.exercises.map((ex, i) => (
                                   <span key={ex} className="flex items-center gap-1.5 text-xs font-bold" style={{ color: EX_COLORS[i] }}>
                                     <span className="w-3 h-1 rounded-full inline-block" style={{ backgroundColor: EX_COLORS[i] }} />
                                     {ex}
@@ -704,12 +704,12 @@ export default function Dashboard() {
                               </div>
                               <div className="h-44">
                                 <ResponsiveContainer width="100%" height="100%">
-                                  <LineChart data={teamExerciseProgress}>
+                                  <LineChart data={athleteExerciseChart.progress}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" vertical={false} />
                                     <XAxis dataKey="name" stroke="#ffffff40" tick={{ fontSize: 9 }} />
                                     <YAxis stroke="#ffffff40" tick={{ fontSize: 9 }} unit="kg" />
                                     <Tooltip content={<CustomTooltip />} />
-                                    {teamTopExercises.map((ex, i) => (
+                                    {athleteExerciseChart.exercises.map((ex, i) => (
                                       <Line key={ex} type="monotone" dataKey={ex} stroke={EX_COLORS[i]}
                                         strokeWidth={2} dot={{ r: 3, fill: EX_COLORS[i] }} activeDot={{ r: 5 }}
                                         connectNulls />
