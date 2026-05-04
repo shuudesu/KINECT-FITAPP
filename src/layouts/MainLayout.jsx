@@ -57,10 +57,22 @@ const MainLayout = () => {
         <h1 className="text-2xl font-display font-bold tracking-wider text-kinetic-white">
           KINE<span className="text-kinetic-neon">TIC</span>
         </h1>
-        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-kinetic-neon">
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="text-kinetic-neon p-2 -mr-1 rounded-lg hover:bg-kinetic-gray/30 transition-colors"
+          aria-label="Menu"
+        >
           {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </div>
+
+      {/* Backdrop — fecha o menu ao tocar fora */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-40 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
 
       {/* Sidebar - Desktop & Mobile overlay */}
       <div className={cn(

@@ -334,10 +334,10 @@ export default function WorkoutSession() {
 
   // TELA: Sessão ativa
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-kinetic-gray pb-4 gap-4">
+    <div className="max-w-3xl mx-auto space-y-6 pb-28 md:pb-6">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 border-b border-kinetic-gray pb-4 gap-2 md:gap-4">
         <div>
-          <h1 className="text-2xl font-display font-bold text-kinetic-white uppercase">{workout.title}</h1>
+          <h1 className="text-xl md:text-2xl font-display font-bold text-kinetic-white uppercase">{workout.title}</h1>
           <p className="text-kinetic-neon text-sm flex items-center gap-2 font-medium mt-1">
             <span className="w-2 h-2 rounded-full bg-kinetic-neon animate-pulse shadow-[0_0_10px_rgba(204,255,0,0.8)]" />
             SESSÃO EM PROGRESSO
@@ -353,7 +353,7 @@ export default function WorkoutSession() {
         <button
           onClick={handleFinish}
           disabled={saving}
-          className="bg-kinetic-neon text-kinetic-black px-8 py-3 rounded-lg font-bold hover:bg-kinetic-white transition-colors uppercase tracking-wider disabled:opacity-50"
+          className="hidden md:flex items-center gap-2 bg-kinetic-neon text-kinetic-black px-8 py-3 rounded-lg font-bold hover:bg-kinetic-white transition-colors uppercase tracking-wider disabled:opacity-50"
         >
           {saving ? 'Registrando...' : 'Finalizar Treino'}
         </button>
@@ -363,15 +363,15 @@ export default function WorkoutSession() {
 
       <div className="space-y-6">
         {(workout.exercises || []).map((exercise, index) => (
-          <div key={index} className="bg-kinetic-black border border-kinetic-gray rounded-xl p-6 shadow-lg">
-            <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-2">
-              <h2 className="text-xl font-bold text-kinetic-white flex items-center gap-3">
-                <span className="text-kinetic-neon font-display text-2xl">{index + 1}.</span>
+          <div key={index} className="bg-kinetic-black border border-kinetic-gray rounded-xl p-4 md:p-6 shadow-lg">
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 md:mb-6 gap-2">
+              <h2 className="text-lg md:text-xl font-bold text-kinetic-white flex items-center gap-3">
+                <span className="text-kinetic-neon font-display text-xl md:text-2xl">{index + 1}.</span>
                 {exercise.name || exercise.customName}
               </h2>
               <div className="sm:text-right flex flex-col gap-1 sm:items-end">
                 {exercise.comment && <p className="text-sm text-kinetic-neon/70 italic">💬 {exercise.comment}</p>}
-                <p className="text-sm font-bold text-kinetic-white/50 bg-kinetic-dark px-3 py-1 rounded">
+                <p className="text-xs md:text-sm font-bold text-kinetic-white/50 bg-kinetic-dark px-3 py-1 rounded self-start sm:self-auto">
                   {exercise.sets} séries × {exercise.reps} reps
                 </p>
               </div>
@@ -381,12 +381,12 @@ export default function WorkoutSession() {
               {[...Array(Number(exercise.sets) || 0)].map((_, sIndex) => {
                 const isCompleted = !!completedSets[`${index}-${sIndex}`];
                 return (
-                  <div key={sIndex} className={`flex items-center gap-4 p-3 rounded-lg border transition-all ${isCompleted ? 'bg-kinetic-neon/10 border-kinetic-neon' : 'bg-kinetic-dark border-kinetic-gray/50'}`}>
-                    <div className={`w-8 h-8 rounded-md flex items-center justify-center font-bold text-sm shrink-0 ${isCompleted ? 'bg-kinetic-neon text-kinetic-black' : 'bg-kinetic-black text-kinetic-white/50'}`}>
+                  <div key={sIndex} className={`flex items-center gap-3 p-3 md:p-4 rounded-lg border transition-all ${isCompleted ? 'bg-kinetic-neon/10 border-kinetic-neon' : 'bg-kinetic-dark border-kinetic-gray/50'}`}>
+                    <div className={`w-9 h-9 rounded-md flex items-center justify-center font-bold text-sm shrink-0 ${isCompleted ? 'bg-kinetic-neon text-kinetic-black' : 'bg-kinetic-black text-kinetic-white/50'}`}>
                       {sIndex + 1}
                     </div>
 
-                    <div className="flex-1 grid grid-cols-2 gap-3">
+                    <div className="flex-1 grid grid-cols-2 gap-2 md:gap-3">
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold z-10"
                           style={{ color: isCompleted && !completedSets[`${index}-${sIndex}-data`]?.weight ? '#FFAA00' : '#ffffff30' }}>
@@ -394,9 +394,10 @@ export default function WorkoutSession() {
                         </span>
                         <input
                           type="number"
+                          inputMode="decimal"
                           placeholder="-"
                           onChange={e => updateSetData(index, sIndex, 'weight', e.target.value)}
-                          className={`w-full bg-kinetic-black border rounded py-2 pl-9 pr-2 focus:outline-none focus:border-kinetic-neon font-mono transition-colors ${
+                          className={`w-full bg-kinetic-black border rounded py-3 pl-9 pr-2 focus:outline-none focus:border-kinetic-neon font-mono transition-colors text-sm md:text-base ${
                             isCompleted && !completedSets[`${index}-${sIndex}-data`]?.weight
                               ? 'border-yellow-500/70 text-yellow-400'
                               : isCompleted
@@ -409,18 +410,19 @@ export default function WorkoutSession() {
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-kinetic-white/30 font-bold">REPS</span>
                         <input
                           type="number"
+                          inputMode="numeric"
                           defaultValue={String(exercise.reps || '').split('-')[0]}
                           onChange={e => updateSetData(index, sIndex, 'reps_done', e.target.value)}
-                          className={`w-full bg-kinetic-black border rounded py-2 pl-12 pr-2 focus:outline-none focus:border-kinetic-neon font-mono ${isCompleted ? 'border-kinetic-neon/30 text-kinetic-neon' : 'border-kinetic-gray text-kinetic-white'}`}
+                          className={`w-full bg-kinetic-black border rounded py-3 pl-12 pr-2 focus:outline-none focus:border-kinetic-neon font-mono text-sm md:text-base ${isCompleted ? 'border-kinetic-neon/30 text-kinetic-neon' : 'border-kinetic-gray text-kinetic-white'}`}
                         />
                       </div>
                     </div>
 
-                    <button onClick={() => toggleSet(index, sIndex)} className="relative group shrink-0">
+                    <button onClick={() => toggleSet(index, sIndex)} className="relative group shrink-0 p-1">
                       <div className={`absolute inset-0 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity ${isCompleted ? 'bg-kinetic-neon' : 'bg-white/20'}`} />
                       {isCompleted
-                        ? <CheckCircle2 className="w-10 h-10 text-kinetic-neon relative z-10 drop-shadow-[0_0_10px_rgba(204,255,0,0.8)]" />
-                        : <div className="w-10 h-10 rounded-full border-2 border-kinetic-gray/80 group-hover:border-kinetic-white/50 relative z-10 transition-colors bg-kinetic-black" />
+                        ? <CheckCircle2 className="w-11 h-11 text-kinetic-neon relative z-10 drop-shadow-[0_0_10px_rgba(204,255,0,0.8)]" />
+                        : <div className="w-11 h-11 rounded-full border-2 border-kinetic-gray/80 group-hover:border-kinetic-white/50 relative z-10 transition-colors bg-kinetic-black" />
                       }
                     </button>
                   </div>
@@ -430,6 +432,18 @@ export default function WorkoutSession() {
           </div>
         ))}
       </div>
+
+      {/* Botão flutuante Finalizar — apenas mobile */}
+      <button
+        onClick={handleFinish}
+        disabled={saving}
+        className="fixed bottom-6 left-4 right-4 z-40 md:hidden bg-kinetic-neon text-kinetic-black py-4 rounded-2xl font-bold text-base uppercase tracking-widest shadow-[0_0_30px_rgba(204,255,0,0.45)] disabled:opacity-50 transition-all active:scale-95 flex items-center justify-center gap-2"
+      >
+        {saving
+          ? <span className="animate-pulse">Registrando...</span>
+          : <><CheckCircle2 className="w-5 h-5" /> Finalizar Treino</>
+        }
+      </button>
     </div>
   );
 }

@@ -174,20 +174,20 @@ export default function UserManagement() {
         </div>
       </header>
 
-      <div className="bg-kinetic-black border border-kinetic-neon/30 rounded-xl p-6 mb-8">
-        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
+      <div className="bg-kinetic-black border border-kinetic-neon/30 rounded-xl p-4 md:p-6 mb-8">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 md:gap-4 mb-5 md:mb-6">
           <div>
-            <h2 className="text-xl font-display font-bold text-kinetic-white flex items-center gap-2">
+            <h2 className="text-lg md:text-xl font-display font-bold text-kinetic-white flex items-center gap-2">
               <LinkIcon className="w-5 h-5 text-kinetic-neon" /> Gerador de Convites
             </h2>
-            <p className="text-kinetic-white/60 text-sm mt-1">
+            <p className="text-kinetic-white/60 text-xs md:text-sm mt-1">
               Cada link gerado só pode ser usado uma vez por um único aluno.
             </p>
           </div>
-          <button 
+          <button
             onClick={handleGenerateInvite}
             disabled={generating}
-            className="flex items-center justify-center gap-2 bg-kinetic-neon text-kinetic-black font-bold h-[42px] px-6 rounded-lg hover:bg-kinetic-white transition-colors uppercase whitespace-nowrap disabled:opacity-50"
+            className="flex items-center justify-center gap-2 bg-kinetic-neon text-kinetic-black font-bold h-[44px] px-5 md:px-6 rounded-lg hover:bg-kinetic-white transition-colors uppercase whitespace-nowrap disabled:opacity-50 text-sm w-full sm:w-auto"
           >
             <PlusCircle className="w-5 h-5" />
             {generating ? 'GERANDO...' : 'GERAR NOVO LINK'}
@@ -201,32 +201,32 @@ export default function UserManagement() {
         ) : (
           <div className="space-y-3">
             {invites.map((invite) => (
-              <div key={invite.id} className="flex flex-col sm:flex-row gap-3 items-center bg-kinetic-dark border border-kinetic-gray rounded-lg p-3">
-                <input 
-                  type="text" 
-                  readOnly 
+              <div key={invite.id} className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-start sm:items-center bg-kinetic-dark border border-kinetic-gray rounded-lg p-3">
+                <input
+                  type="text"
+                  readOnly
                   value={`${window.location.origin}/login?invite=${invite.id}`}
-                  className={`flex-1 bg-transparent border-none text-sm font-mono focus:outline-none w-full ${invite.status === 'accepted' ? 'line-through text-kinetic-white/30' : 'text-kinetic-neon'}`}
+                  className={`flex-1 bg-transparent border-none text-xs sm:text-sm font-mono focus:outline-none w-full min-w-0 truncate ${invite.status === 'accepted' ? 'line-through text-kinetic-white/30' : 'text-kinetic-neon'}`}
                 />
-                
-                <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+
+                <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
                   <span className={`text-xs font-bold uppercase px-2 py-1 rounded border ${invite.status === 'accepted' ? 'border-green-500/20 text-green-500 bg-green-500/10' : 'border-yellow-500/20 text-yellow-500 bg-yellow-500/10'}`}>
                     {invite.status === 'accepted' ? 'USADO' : 'PENDENTE'}
                   </span>
-                  
+
                   {invite.status === 'pending' && (
-                    <button 
+                    <button
                       onClick={() => handleCopyLink(invite.id)}
-                      className="flex items-center justify-center gap-1 bg-kinetic-white/10 text-kinetic-white h-[32px] px-3 rounded hover:bg-kinetic-white/20 transition-colors uppercase text-xs font-bold ml-2"
+                      className="flex items-center justify-center gap-1 bg-kinetic-white/10 text-kinetic-white h-[40px] px-3 rounded hover:bg-kinetic-white/20 transition-colors uppercase text-xs font-bold"
                     >
                       {copiedId === invite.id ? <CheckCircle className="w-4 h-4 text-kinetic-neon" /> : <Copy className="w-4 h-4" />}
                       COPIAR
                     </button>
                   )}
-                  
-                  <button 
+
+                  <button
                     onClick={() => handleDeleteInvite(invite.id)}
-                    className="p-2 text-red-500/50 hover:text-red-500 transition-colors bg-kinetic-white/5 rounded h-[32px] ml-1"
+                    className="p-2.5 text-red-500/50 hover:text-red-500 transition-colors bg-kinetic-white/5 rounded h-[40px] w-[40px] flex items-center justify-center"
                     title="Excluir Convite"
                   >
                     <Trash2 className="w-4 h-4" />

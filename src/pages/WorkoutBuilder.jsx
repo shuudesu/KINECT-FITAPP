@@ -255,17 +255,17 @@ export default function WorkoutBuilder() {
     <div className="max-w-4xl mx-auto space-y-10">
       
       {/* FORMULÁRIO DE CRIAÇÃO/EDIÇÃO */}
-      <div className="bg-kinetic-black border border-kinetic-gray rounded-xl p-8 shadow-2xl relative overflow-hidden">
+      <div className="bg-kinetic-black border border-kinetic-gray rounded-xl p-4 sm:p-6 md:p-8 shadow-2xl relative overflow-hidden">
         {editingId && (
           <div className="absolute top-0 left-0 w-full h-1 bg-kinetic-neon animate-pulse"></div>
         )}
         
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 gap-3 md:gap-4">
           <div>
-            <h1 className="text-3xl font-display font-bold text-kinetic-white uppercase tracking-wide flex items-center gap-3">
-              {editingId ? <><Edit2 className="w-6 h-6 text-kinetic-neon" /> Editando Treino</> : 'Workout Builder'}
+            <h1 className="text-2xl md:text-3xl font-display font-bold text-kinetic-white uppercase tracking-wide flex items-center gap-3">
+              {editingId ? <><Edit2 className="w-5 h-5 md:w-6 md:h-6 text-kinetic-neon" /> Editando Treino</> : 'Workout Builder'}
             </h1>
-            <p className="text-kinetic-white/60 mt-1">Crie e edite as sessões de treino para seus atletas.</p>
+            <p className="text-kinetic-white/60 mt-1 text-sm md:text-base">Crie e edite as sessões de treino para seus atletas.</p>
           </div>
           <div className="flex items-center gap-3 w-full md:w-auto">
             {editingId && (
@@ -313,7 +313,7 @@ export default function WorkoutBuilder() {
           <h3 className="text-lg font-display font-bold text-kinetic-white border-b border-kinetic-gray pb-2 mb-6 uppercase">Exercícios Selecionados</h3>
           
           {exercises.map((exercise, index) => (
-            <div key={exercise.id} className="flex flex-col md:flex-row items-start md:items-center gap-4 bg-kinetic-dark p-6 rounded-lg border border-kinetic-gray/50 group hover:border-kinetic-neon/30 transition-colors">
+            <div key={exercise.id} className="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-4 bg-kinetic-dark p-4 md:p-6 rounded-lg border border-kinetic-gray/50 group hover:border-kinetic-neon/30 transition-colors">
               <div className="cursor-move text-kinetic-white/30 hover:text-kinetic-neon hidden md:block mt-6">
                 <GripVertical className="w-5 h-5" />
               </div>
@@ -468,7 +468,7 @@ export default function WorkoutBuilder() {
       </div>
 
       {/* LISTA DE TREINOS EXISTENTES */}
-      <div className="bg-kinetic-black border border-kinetic-gray rounded-xl p-8">
+      <div className="bg-kinetic-black border border-kinetic-gray rounded-xl p-4 sm:p-6 md:p-8">
         <h2 className="text-2xl font-display font-bold text-kinetic-white mb-6 uppercase flex items-center gap-2">
           <Dumbbell className="w-6 h-6 text-kinetic-neon" /> Catálogo de Treinos
         </h2>
@@ -506,7 +506,7 @@ export default function WorkoutBuilder() {
       </div>
 
       {/* SECTION: MEUS ALUNOS - ATRIBUIÇÃO */}
-      <div className="bg-kinetic-black border border-kinetic-gray rounded-xl p-8 mb-8">
+      <div className="bg-kinetic-black border border-kinetic-gray rounded-xl p-4 sm:p-6 md:p-8 mb-8">
         <h2 className="text-2xl font-display font-bold text-kinetic-white mb-6 uppercase flex items-center gap-2">
           <UserPlus className="w-6 h-6 text-kinetic-neon" /> Atribuição de Fichas aos Alunos
         </h2>

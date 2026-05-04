@@ -375,14 +375,14 @@ export default function Dashboard() {
   // ── Sub-componentes ────────────────────────────────────────────────────────
 
   const StatCard = ({ title, value, icon: Icon, sub }) => (
-    <div className="bg-kinetic-black border border-kinetic-gray rounded-xl p-5 flex items-center justify-between shadow-lg hover:border-kinetic-neon/30 transition-colors">
-      <div>
-        <p className="text-kinetic-white/50 text-xs font-bold uppercase tracking-wider mb-1">{title}</p>
-        <p className="text-3xl font-display font-bold text-kinetic-white">{value}</p>
-        {sub && <p className="text-xs text-kinetic-white/30 mt-1">{sub}</p>}
+    <div className="bg-kinetic-black border border-kinetic-gray rounded-xl p-3 md:p-5 flex items-center justify-between shadow-lg hover:border-kinetic-neon/30 transition-colors">
+      <div className="min-w-0 mr-2">
+        <p className="text-kinetic-white/50 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-1 truncate">{title}</p>
+        <p className="text-2xl md:text-3xl font-display font-bold text-kinetic-white leading-tight">{value}</p>
+        {sub && <p className="text-[10px] md:text-xs text-kinetic-white/30 mt-1 hidden sm:block">{sub}</p>}
       </div>
-      <div className="w-12 h-12 bg-kinetic-dark rounded-full flex items-center justify-center text-kinetic-neon shrink-0">
-        <Icon className="w-6 h-6" />
+      <div className="w-9 h-9 md:w-12 md:h-12 bg-kinetic-dark rounded-full flex items-center justify-center text-kinetic-neon shrink-0">
+        <Icon className="w-4 h-4 md:w-6 md:h-6" />
       </div>
     </div>
   );
@@ -424,22 +424,12 @@ export default function Dashboard() {
             <div className="space-y-8">
 
               {/* KPI Cards */}
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <div className="col-span-2 md:col-span-1">
-                  <StatCard title="Treinos" value={athleteMetrics.sessions} icon={CheckCircle} />
-                </div>
-                <div className="col-span-2 md:col-span-1">
-                  <StatCard title="Streak 🔥" value={`${athleteMetrics.streak}d`} icon={Flame} sub="Dias consecutivos" />
-                </div>
-                <div className="col-span-2 md:col-span-1">
-                  <StatCard title="Volume Total" value={athleteMetrics.totalVolume > 999 ? `${(athleteMetrics.totalVolume / 1000).toFixed(1)}t` : `${athleteMetrics.totalVolume}kg`} icon={Zap} />
-                </div>
-                <div className="col-span-2 md:col-span-1">
-                  <StatCard title="Conclusão" value={`${athleteMetrics.avgCompletion}%`} icon={Target} sub="Média das sessões" />
-                </div>
-                <div className="col-span-2 md:col-span-1">
-                  <StatCard title="Duração Média" value={`${athleteMetrics.avgDuration}min`} icon={Timer} />
-                </div>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
+                <StatCard title="Treinos" value={athleteMetrics.sessions} icon={CheckCircle} />
+                <StatCard title="Streak 🔥" value={`${athleteMetrics.streak}d`} icon={Flame} sub="Dias consecutivos" />
+                <StatCard title="Volume Total" value={athleteMetrics.totalVolume > 999 ? `${(athleteMetrics.totalVolume / 1000).toFixed(1)}t` : `${athleteMetrics.totalVolume}kg`} icon={Zap} />
+                <StatCard title="Conclusão" value={`${athleteMetrics.avgCompletion}%`} icon={Target} sub="Média das sessões" />
+                <StatCard title="Duração Média" value={`${athleteMetrics.avgDuration}min`} icon={Timer} />
               </div>
 
               {/* Volume — AreaChart com toggle de período */}
