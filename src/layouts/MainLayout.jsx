@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Activity, LayoutDashboard, NotebookPen, Users, LogOut, Menu, X, ShieldAlert, Timer } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import ChangePasswordModal from '../components/ChangePasswordModal';
 
 function cn(...inputs) {
   return twMerge(clsx(inputs));
@@ -115,6 +116,8 @@ const MainLayout = () => {
       <main className="flex-1 overflow-x-hidden overflow-y-auto bg-kinetic-dark p-4 md:p-8">
         <Outlet />
       </main>
+
+      {user?.must_change_password && <ChangePasswordModal />}
     </div>
   );
 };

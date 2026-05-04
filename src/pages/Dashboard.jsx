@@ -218,13 +218,17 @@ export default function Dashboard() {
         }
       }
 
-      // Feed
-      const { data: feed } = await supabase
-        .from('workout_sessions')
-        .select('completed_at, total_volume_kg, duration_minutes, profiles(name), workouts(title)')
-        .order('completed_at', { ascending: false })
-        .limit(8);
-      if (feed) setRecentActivities(feed);
+      // Feed — apenas atletas do coach
+      const athleteIds = athletesData ? athletesData.map(a => a.id) : [];
+      if (athleteIds.length > 0) {
+        const { data: feed } = await supabase
+          .from('workout_sessions')
+          .select('completed_at, total_volume_kg, duration_minutes, profiles(name), workouts(title)')
+          .in('athlete_id', athleteIds)
+          .order('completed_at', { ascending: false })
+          .limit(8);
+        if (feed) setRecentActivities(feed);
+      }
 
     } else {
       // ATLETA — buscar tudo incluindo stats e exercícios do treino

@@ -58,8 +58,12 @@ export const AuthProvider = ({ children }) => {
 
       if (error) throw error;
       
-      // Merge do objeto auth com o profile
-      setUser({ ...authUser, ...data });
+      // Merge do objeto auth com o profile; expõe flag de primeiro acesso
+      setUser({
+        ...authUser,
+        ...data,
+        must_change_password: authUser.user_metadata?.must_change_password === true,
+      });
     } catch (error) {
       console.error('Erro ao buscar perfil:', error.message);
       // Se não achar o perfil e for um signup em andamento, não seta role falso, deixa null ou básico
@@ -81,6 +85,9 @@ export const AuthProvider = ({ children }) => {
       const { data: authData, error: authError } = await isolatedClient.auth.signUp({
         email: dummyEmail,
         password,
+        options: {
+          data: { must_change_password: role === 'coach' },
+        },
       });
 
       if (authError) throw authError;
@@ -131,8 +138,22 @@ export const AuthProvider = ({ children }) => {
     await supabase.auth.signOut();
   };
 
+  const changePassword = async (newPassword) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+        data: { must_change_password: false },
+      });
+      if (error) throw error;
+      setUser(prev => ({ ...prev, must_change_password: false }));
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, changePassword, loading }}>
       {!loading ? children : (
         <div className="min-h-screen bg-kinetic-dark flex items-center justify-center">
           <div className="w-12 h-12 border-4 border-kinetic-gray border-t-kinetic-neon rounded-full animate-spin"></div>

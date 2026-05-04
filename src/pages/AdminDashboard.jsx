@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldAlert, UserPlus } from 'lucide-react';
+import { ShieldAlert, UserPlus, Trash2 } from 'lucide-react';
 import { supabase } from '../supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
@@ -39,6 +39,21 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchProfiles();
   }, []);
+
+  const handleDeleteProfile = async (profile) => {
+    const label = profile.role === 'coach' ? 'treinador' : 'usuário';
+    if (!window.confirm(`Excluir o ${label} "${profile.name}"? Esta ação não pode ser desfeita.`)) return;
+    try {
+      const { error } = await supabase.from('profiles').delete().eq('id', profile.id);
+      if (error) throw error;
+      setProfiles(prev => prev.filter(p => p.id !== profile.id));
+      setMsg(`${profile.name} removido com sucesso.`);
+      setTimeout(() => setMsg(''), 3000);
+    } catch (err) {
+      setMsg('Erro ao excluir: ' + (err.message || 'verifique as políticas RLS no Supabase.'));
+      setTimeout(() => setMsg(''), 5000);
+    }
+  };
 
   const handleCreateCoach = async (e) => {
     e.preventDefault();
@@ -114,6 +129,7 @@ export default function AdminDashboard() {
                   <th className="px-6 py-4 text-sm font-medium text-kinetic-white/70 uppercase">Usuário</th>
                   <th className="px-6 py-4 text-sm font-medium text-kinetic-white/70 uppercase">Role</th>
                   <th className="px-6 py-4 text-sm font-medium text-kinetic-white/70 uppercase">Criado em</th>
+                  <th className="px-6 py-4 text-sm font-medium text-kinetic-white/70 uppercase text-right">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-kinetic-gray/50">
@@ -130,8 +146,8 @@ export default function AdminDashboard() {
                     <td className="px-6 py-4 text-kinetic-white/70 text-sm">{p.username || p.email.split('@')[0]}</td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase border ${
-                        p.role === 'admin' 
-                          ? 'bg-red-500/10 text-red-500 border-red-500/20' 
+                        p.role === 'admin'
+                          ? 'bg-red-500/10 text-red-500 border-red-500/20'
                           : p.role === 'coach'
                             ? 'bg-kinetic-neon/10 text-kinetic-neon border-kinetic-neon/20'
                             : 'bg-blue-500/10 text-blue-500 border-blue-500/20'
@@ -141,6 +157,17 @@ export default function AdminDashboard() {
                     </td>
                     <td className="px-6 py-4 text-kinetic-white/50 text-sm">
                       {new Date(p.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      {p.role !== 'admin' && (
+                        <button
+                          onClick={() => handleDeleteProfile(p)}
+                          className="p-2 text-red-500/40 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                          title={`Excluir ${p.name}`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
