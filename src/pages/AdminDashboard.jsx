@@ -42,15 +42,18 @@ export default function AdminDashboard() {
 
   const handleDeleteProfile = async (profile) => {
     const label = profile.role === 'coach' ? 'treinador' : 'usuário';
-    if (!window.confirm(`Excluir o ${label} "${profile.name}"? Esta ação não pode ser desfeita.`)) return;
+    if (!window.confirm(`Excluir o ${label} "${profile.name}"? Esta ação remove o acesso permanentemente e libera o username para novo cadastro.`)) return;
     try {
-      const { error } = await supabase.from('profiles').delete().eq('id', profile.id);
+      const { data, error } = await supabase.functions.invoke('delete-user', {
+        body: { user_id: profile.id },
+      });
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
       setProfiles(prev => prev.filter(p => p.id !== profile.id));
       setMsg(`${profile.name} removido com sucesso.`);
       setTimeout(() => setMsg(''), 3000);
     } catch (err) {
-      setMsg('Erro ao excluir: ' + (err.message || 'verifique as políticas RLS no Supabase.'));
+      setMsg('Erro ao excluir: ' + (err.message || 'Verifique se a Edge Function está publicada no Supabase.'));
       setTimeout(() => setMsg(''), 5000);
     }
   };
